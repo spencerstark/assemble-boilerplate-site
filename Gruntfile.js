@@ -27,6 +27,15 @@ module.exports = function(grunt) {
         layoutdir: 'src/templates/layouts',
         partials: ['src/templates/includes/**/*.hbs'],
       },
+      blogs: {
+        options: {
+          flatten: true,
+          partials: ['src/blog/*.md'] 
+        },
+        files:{
+          '<%= site.destination %>/zachs/': ['src/templates/pages/test.hbs']
+        }
+      },
       site: {
         // Target-level options
         options: {layout: 'default.hbs'},
@@ -40,14 +49,43 @@ module.exports = function(grunt) {
     // remove any previously-created files.
     clean: {
       all: ['<%= site.destination %>/**/*.{html,md}']
+    },
+    // create a local server
+    connect: {
+      server: {
+        options: {
+          livereload: 35730,
+          port: 8080,
+          base: '<%= site.destination %>'
+        }
+      }
+    },
+    // different watch options trigger different tasks
+    watch: {
+      options: {
+        livereload: true
+      },
+      assemble: {
+        files: ['src/**/*.hbs', '!src/templates/misc/readme.md.hbs', 'src/data/*.assemble.json'],
+        tasks: ['assemble:dev']
+      },
+      templates: {
+        files: ['src/fonts/**'],
+        tasks: ['copy:fonts']
+      },
+      all: {
+        files: ['src/**'],
+        tasks: ['assemble']
+      }
     }
   });
 
   // Load npm plugins to provide necessary tasks.
   grunt.loadNpmTasks('assemble');
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-verb');
 
   // Default task to be run.
-  grunt.registerTask('default', ['clean', 'assemble']);
+  grunt.registerTask('default', ['clean', 'assemble', 'connect:server']);
 };
